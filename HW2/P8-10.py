@@ -19,17 +19,14 @@ def linear_regression(data_th, noisy_out,data_size):
         W_g=X_pseudo.dot(noisy_out)
         ''' checking the data using the hypothesis '''
         output_g=classify_line(data_th,W_g)
-        tmp=(output_g == output_TF)
-        E_in=(np.size(tmp)-np.sum(tmp))/data_size
+        #tmp=(output_g == output_TF) #bug: i was comparing with orig output not the noisy one
+        tmp=(output_g == noisy_out)
+        E_in=(np.size(tmp)-np.sum(tmp))/float(data_size)
         return E_in
 
 def lin_reg_nonlin_trans(Z, noisy_out,data_size):
         X_pseudo= inv((Z.T).dot(Z)).dot(Z.T)
         W_g=X_pseudo.dot(noisy_out)
-        ''' checking the data using the hypothesis '''
-        ''' output_g=classify_line(data_th,W_g)
-        tmp=(output_g == output_TF)
-        E_in=(np.size(tmp)-np.sum(tmp))/data_size'''
         return W_g
 
 
@@ -42,10 +39,10 @@ def classify_line(data_th,W):
     output=np.sign(data_th.dot(W))
     return output #output of target function       
     
-def classify_nonlin(input_vec,w_vec,output_TF):
+def classify_nonlin(input_vec,w_vec,noisy_out):
     output=np.sign(input_vec.dot(w_vec))
-    tmp=(output == output_TF)
-    E=(np.size(tmp)-np.sum(tmp))/1000
+    tmp=(output == noisy_out)
+    E=(np.size(tmp)-np.sum(tmp))/float(1000)
     return E #output of target function       
 #number of data points
 data_size=1000
@@ -85,7 +82,10 @@ E_3=[]
 E_4=[]
 E_5=[]
 ''' this for loop to compare between hypothesis, un intentionally I solved Q10 here also by
-generating fresh data, evaluating Tf for them then classifying using my hypothesis, i choose a for Q10 but it is wrong '''
+generating fresh data, evaluating Tf for them then classifying using my hypothesis, i choose a for Q10 but it is wrong
+because i was comparing against the original output_TF not the noisy one. 
+After comparing with the noisy out i got it right, answer [b]
+ '''
 
 for i in range (1000):    
     data,data_th=generate_training_data(data_size)
@@ -97,12 +97,13 @@ for i in range (1000):
     tmp1=np.column_stack( (np.square(data[:,0]),np.square(data[:,1])) ) #[x1^2,x2^2]
     tmp2=np.column_stack( (data_th, data[:,0]*data[:,1])      )       #[1,x1,x2,x1x2]
     Z=np.column_stack((tmp2,tmp1)) 
-    E_mine.append(classify_nonlin(Z,W_non_lin, output_TF))
-    E_1.append(classify_nonlin(Z,g1, output_TF))
-    E_2.append(classify_nonlin(Z,g2, output_TF))
-    E_3.append(classify_nonlin(Z,g3, output_TF))
-    E_4.append(classify_nonlin(Z,g4, output_TF))
-    E_5.append(classify_nonlin(Z,g5, output_TF))
+    E_mine.append(classify_nonlin(Z,W_non_lin, noisy_out))
+    #There was a bug here, i was comparing against the orig output_TF not the noisy one
+    E_1.append(classify_nonlin(Z,g1, noisy_out))
+    E_2.append(classify_nonlin(Z,g2, noisy_out))
+    E_3.append(classify_nonlin(Z,g3, noisy_out))
+    E_4.append(classify_nonlin(Z,g4, noisy_out))
+    E_5.append(classify_nonlin(Z,g5, noisy_out))
 ''' #Z=(1,x1,x2,x1x2,x1^2,x2^2) '''
 
 
